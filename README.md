@@ -152,6 +152,24 @@ lpm info @lpm.dev/owner.package --all-versions
 lpm info @lpm.dev/owner.package --json
 ```
 
+#### Check Name
+
+Check if a package name is available on the registry.
+
+```bash
+lpm check-name acme.new-package
+lpm check-name acme.new-package --json
+```
+
+#### Quality
+
+Show the server-side quality report for a published package. Displays the score, tier, and breakdown of all 27 checks.
+
+```bash
+lpm quality @lpm.dev/owner.package
+lpm quality @lpm.dev/owner.package --json
+```
+
 ### Security & Maintenance
 
 #### Audit
@@ -234,6 +252,39 @@ Rotate your authentication token.
 
 ```bash
 lpm token rotate
+```
+
+### Pool Revenue
+
+#### Pool Stats
+
+Show your Pool earnings estimate for the current billing period. Displays per-package breakdown with install counts, weighted downloads, share percentage, and estimated earnings.
+
+```bash
+lpm pool stats
+lpm pool stats --json
+```
+
+### Marketplace
+
+#### Compare
+
+Find comparable packages by name or category. Useful for pricing research and competitive analysis.
+
+```bash
+lpm marketplace compare "form builder"
+lpm marketplace compare ui --category ui-components
+lpm marketplace compare auth --limit 5
+lpm marketplace compare "form builder" --json
+```
+
+#### Earnings
+
+Show your Marketplace revenue summary including total sales, gross revenue, platform fees, and net revenue.
+
+```bash
+lpm marketplace earnings
+lpm marketplace earnings --json
 ```
 
 ## API Reference

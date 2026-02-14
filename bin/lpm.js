@@ -18,9 +18,14 @@ import { logout } from '../lib/commands/logout.js';
 import { openDashboard } from '../lib/commands/open.js';
 import { outdated } from '../lib/commands/outdated.js';
 import { publish } from '../lib/commands/publish.js';
+import { quality } from '../lib/commands/quality.js';
 import { run } from '../lib/commands/run.js';
 import { search } from '../lib/commands/search.js';
 import { setup } from '../lib/commands/setup.js';
+import { checkName } from '../lib/commands/check-name.js';
+import { marketplaceCompare } from '../lib/commands/marketplace-compare.js';
+import { marketplaceEarnings } from '../lib/commands/marketplace-earnings.js';
+import { poolStats } from '../lib/commands/pool-stats.js';
 import { rotateToken } from '../lib/commands/token-rotate.js';
 import { whoami } from '../lib/commands/whoami.js';
 
@@ -61,6 +66,7 @@ program
 program
   .command('whoami')
   .description('Check current authenticated user')
+  .option('--json', 'Output in JSON format')
   .action(whoami);
 
 // ============================================================================
@@ -116,6 +122,18 @@ program
   .option('--json', 'Output in JSON format')
   .option('-a, --all-versions', 'Show all versions')
   .action(info);
+
+program
+  .command('check-name <name>')
+  .description('Check if a package name is available on the registry')
+  .option('--json', 'Output in JSON format')
+  .action(checkName);
+
+program
+  .command('quality <package>')
+  .description('Show the server-side quality report for a package')
+  .option('--json', 'Output in JSON format')
+  .action(quality);
 
 // ============================================================================
 // Security & Maintenance Commands
@@ -195,5 +213,41 @@ token
   .command('rotate')
   .description('Rotate the current token')
   .action(rotateToken);
+
+// ============================================================================
+// Pool Revenue (Subcommand)
+// ============================================================================
+
+const pool = program
+  .command('pool')
+  .description('Pool revenue commands');
+
+pool
+  .command('stats')
+  .description('Show your Pool earnings estimate for the current month')
+  .option('--json', 'Output in JSON format')
+  .action(poolStats);
+
+// ============================================================================
+// Marketplace (Subcommand)
+// ============================================================================
+
+const marketplace = program
+  .command('marketplace')
+  .description('Marketplace commands');
+
+marketplace
+  .command('compare <input>')
+  .description('Find comparable packages by name or category')
+  .option('--json', 'Output in JSON format')
+  .option('--category <category>', 'Filter by category')
+  .option('--limit <n>', 'Maximum number of results')
+  .action(marketplaceCompare);
+
+marketplace
+  .command('earnings')
+  .description('Show your Marketplace revenue summary')
+  .option('--json', 'Output in JSON format')
+  .action(marketplaceEarnings);
 
 program.parse();
