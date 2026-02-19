@@ -116,5 +116,5 @@ export function applyTemplateVariables(content: string, config: Record<string, s
 export type Framework = "nextjs" | "vite" | "remix" | "astro" | "unknown"
 
 export function detectFramework(): Framework
-export function getDefaultPath(framework: Framework, pkgBaseName: string): string
+export function getDefaultPath(framework: Framework): string
 export function getUserImportPrefix(): string
