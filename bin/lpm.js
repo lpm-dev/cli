@@ -19,12 +19,14 @@ import { openDashboard } from '../lib/commands/open.js';
 import { outdated } from '../lib/commands/outdated.js';
 import { publish } from '../lib/commands/publish.js';
 import { quality } from '../lib/commands/quality.js';
+import { remove } from '../lib/commands/remove.js';
 import { run } from '../lib/commands/run.js';
 import { search } from '../lib/commands/search.js';
 import { setup } from '../lib/commands/setup.js';
 import { checkName } from '../lib/commands/check-name.js';
 import { marketplaceCompare } from '../lib/commands/marketplace-compare.js';
 import { marketplaceEarnings } from '../lib/commands/marketplace-earnings.js';
+import { mcpSetup, mcpRemove, mcpStatus } from '../lib/commands/mcp-setup.js';
 import { poolStats } from '../lib/commands/pool-stats.js';
 import { rotateToken } from '../lib/commands/token-rotate.js';
 import { whoami } from '../lib/commands/whoami.js';
@@ -102,6 +104,12 @@ program
   .option('-f, --force', 'Overwrite existing files without prompting')
   .option('-y, --yes', 'Accept defaults, skip interactive config prompts')
   .action(add);
+
+program
+  .command('remove <package>')
+  .alias('rm')
+  .description('Remove a previously added package (e.g., MCP servers from editors)')
+  .action(remove);
 
 // ============================================================================
 // Package Discovery Commands
@@ -227,6 +235,31 @@ pool
   .description('Show your Pool earnings estimate for the current month')
   .option('--json', 'Output in JSON format')
   .action(poolStats);
+
+// ============================================================================
+// MCP Server (Subcommand)
+// ============================================================================
+
+const mcp = program
+  .command('mcp')
+  .description('MCP server commands');
+
+mcp
+  .command('setup')
+  .description('Configure the LPM MCP server in your AI coding editors')
+  .option('--project', 'Add to project-level config instead of global')
+  .action(mcpSetup);
+
+mcp
+  .command('remove')
+  .description('Remove the LPM MCP server from all configured editors')
+  .option('--project', 'Remove from project-level config only')
+  .action(mcpRemove);
+
+mcp
+  .command('status')
+  .description('Show where the LPM MCP server is configured')
+  .action(mcpStatus);
 
 // ============================================================================
 // Marketplace (Subcommand)
