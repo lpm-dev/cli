@@ -333,7 +333,6 @@ import {
 | `readLpmConfig(dir)` | Read and validate `lpm.config.json` from a directory |
 | `validateLpmConfig(config)` | Validate a parsed config object |
 | `filterFiles(files, config, params)` | Filter file rules based on config conditions |
-| `applyTemplateVariables(content, config)` | Replace `{{placeholder}}` variables in content |
 
 ### Project Utils
 

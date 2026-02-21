@@ -26,7 +26,6 @@ export {
 	readLpmConfig,
 	validateLpmConfig,
 	filterFiles,
-	applyTemplateVariables,
 } from "./lib/lpm-config.js"
 
 export {

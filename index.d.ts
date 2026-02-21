@@ -86,14 +86,10 @@ export interface LpmConfig {
 		src: string
 		dest?: string
 		when?: string
-		template?: boolean
 	}>
 	configSchema?: Record<string, unknown>
 	defaultConfig?: Record<string, string>
 	dependencies?: Record<string, unknown>
-	variants?: Record<string, unknown>
-	transform?: "template" | "variants" | "hybrid"
-	output?: Record<string, string>
 }
 
 export interface LpmConfigValidation {
@@ -109,8 +105,6 @@ export function filterFiles(
 	mergedConfig: Record<string, string>,
 	providedParams: Set<string>,
 ): NonNullable<LpmConfig["files"]>
-export function applyTemplateVariables(content: string, config: Record<string, string>): string
-
 // --- project-utils.js ---
 
 export type Framework = "nextjs" | "vite" | "remix" | "astro" | "unknown"
