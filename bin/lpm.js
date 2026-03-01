@@ -84,6 +84,7 @@ program
   .command('install [packages...]')
   .alias('i')
   .description('Install packages with automatic registry authentication')
+  .option('--json', 'Machine-readable JSON output')
   .action(install);
 
 program
@@ -103,6 +104,12 @@ program
   .option('-p, --path <path>', 'Target directory for the component')
   .option('-f, --force', 'Overwrite existing files without prompting')
   .option('-y, --yes', 'Accept defaults, skip interactive config prompts')
+  .option('--alias <alias>', 'Import alias prefix (e.g., @/components/ui)')
+  .option('--target <name>', 'Swift SPM target name')
+  .option('--install-deps', 'Auto-install npm dependencies (default: true)')
+  .option('--no-install-deps', 'Skip npm dependency installation')
+  .option('--json', 'Machine-readable JSON output')
+  .option('--dry-run', 'Preview what would happen without writing files')
   .action(add);
 
 program
