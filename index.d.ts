@@ -1,3 +1,5 @@
+/// <reference types="node" />
+
 // Type declarations for @lpm-registry/cli
 
 // --- integrity.js ---
