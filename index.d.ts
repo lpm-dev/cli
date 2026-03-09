@@ -17,8 +17,14 @@ export interface IntegrityResult {
 }
 
 export function generateIntegrity(buffer: Buffer, algorithm?: string): string
-export function verifyIntegrity(buffer: Buffer, expectedIntegrity: string): IntegrityResult
-export function verifyIntegrityMultiple(buffer: Buffer, integrities: string[]): IntegrityResult
+export function verifyIntegrity(
+	buffer: Buffer,
+	expectedIntegrity: string,
+): IntegrityResult
+export function verifyIntegrityMultiple(
+	buffer: Buffer,
+	integrities: string[],
+): IntegrityResult
 export function parseIntegrity(integrity: string): IntegrityHash
 
 // --- safe-path.js ---
@@ -34,9 +40,18 @@ export interface TarballPathValidation {
 	invalidPaths?: string[]
 }
 
-export function validateComponentPath(projectRoot: string, componentPath: string): PathValidation
-export function validateTarballPaths(extractDir: string, filePaths: string[]): TarballPathValidation
-export function resolveSafePath(basePath: string, userPath: string): PathValidation
+export function validateComponentPath(
+	projectRoot: string,
+	componentPath: string,
+): PathValidation
+export function validateTarballPaths(
+	extractDir: string,
+	filePaths: string[],
+): TarballPathValidation
+export function resolveSafePath(
+	basePath: string,
+	userPath: string,
+): PathValidation
 export function sanitizeFilename(filename: string): string
 
 // --- quality/score.js ---

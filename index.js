@@ -7,29 +7,25 @@
 
 export {
 	generateIntegrity,
+	parseIntegrity,
 	verifyIntegrity,
 	verifyIntegrityMultiple,
-	parseIntegrity,
 } from "./lib/integrity.js"
-
 export {
-	validateComponentPath,
-	validateTarballPaths,
-	resolveSafePath,
-	sanitizeFilename,
-} from "./lib/safe-path.js"
-
-export { runQualityChecks } from "./lib/quality/score.js"
-
-export {
+	filterFiles,
 	parseLpmPackageReference,
 	readLpmConfig,
 	validateLpmConfig,
-	filterFiles,
 } from "./lib/lpm-config.js"
-
 export {
 	detectFramework,
 	getDefaultPath,
 	getUserImportPrefix,
 } from "./lib/project-utils.js"
+export { runQualityChecks } from "./lib/quality/score.js"
+export {
+	resolveSafePath,
+	sanitizeFilename,
+	validateComponentPath,
+	validateTarballPaths,
+} from "./lib/safe-path.js"

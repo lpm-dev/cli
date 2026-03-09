@@ -124,10 +124,19 @@ lpm i                       # Shortcut
 Download and extract package source code directly into your project (shadcn-style).
 
 ```bash
+# JavaScript
 lpm add @lpm.dev/owner.component
 lpm add @lpm.dev/tolgaergin.button --path ./src/ui/Button
 lpm add @lpm.dev/owner.component --force  # Overwrite without prompting
+
+# Swift (auto-detects project type)
+lpm add @lpm.dev/acme.swift-charts
 ```
+
+For Swift projects, the CLI auto-detects whether you have a `Package.swift` (SPM package) or `.xcodeproj` (Xcode app project):
+
+- **SPM packages:** Files are copied into the appropriate `Sources/{target}/` directory. SPM auto-discovers new `.swift` files.
+- **Xcode app projects:** The CLI scaffolds a local SPM package at `Packages/LPMComponents/`, copies source files, and auto-links the package in your `.xcodeproj` file. Xcode hot-reloads the change — no restart needed.
 
 ### Package Discovery
 
