@@ -28,6 +28,12 @@ import { remove } from "../lib/commands/remove.js"
 import { run } from "../lib/commands/run.js"
 import { search } from "../lib/commands/search.js"
 import { setup } from "../lib/commands/setup.js"
+import {
+	skillsClean,
+	skillsInstall,
+	skillsList,
+	skillsValidate,
+} from "../lib/commands/skills.js"
 import { rotateToken } from "../lib/commands/token-rotate.js"
 import { whoami } from "../lib/commands/whoami.js"
 
@@ -85,6 +91,7 @@ program
 	.alias("i")
 	.description("Install packages with automatic registry authentication")
 	.option("--json", "Machine-readable JSON output")
+	.option("--no-skills", "Skip fetching Agent Skills after install")
 	.action(install)
 
 program
@@ -110,6 +117,7 @@ program
 	.option("--no-install-deps", "Skip npm dependency installation")
 	.option("--json", "Machine-readable JSON output")
 	.option("--dry-run", "Preview what would happen without writing files")
+	.option("--no-skills", "Skip fetching Agent Skills after add")
 	.action(add)
 
 program
@@ -266,6 +274,40 @@ mcp
 	.description("Show where the LPM MCP server is configured")
 	.option("--verbose", "Show command and args diagnostics for each editor")
 	.action(mcpStatus)
+
+// ============================================================================
+// Agent Skills (Subcommand)
+// ============================================================================
+
+const skills = program
+	.command("skills")
+	.description("Manage Agent Skills for AI coding assistants")
+
+skills
+	.command("validate")
+	.description("Validate .lpm/skills/ files in the current directory")
+	.option("--json", "Output in JSON format")
+	.action(skillsValidate)
+
+skills
+	.command("install [package]")
+	.description(
+		"Fetch and install skills from the registry (all deps or specific package)",
+	)
+	.option("--json", "Output in JSON format")
+	.action(skillsInstall)
+
+skills
+	.command("list")
+	.description("List available skills for installed @lpm.dev/* packages")
+	.option("--json", "Output in JSON format")
+	.action(skillsList)
+
+skills
+	.command("clean")
+	.description("Remove locally installed skills (.lpm/skills/ directory)")
+	.option("--json", "Output in JSON format")
+	.action(skillsClean)
 
 // ============================================================================
 // Marketplace (Subcommand)

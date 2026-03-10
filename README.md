@@ -108,6 +108,8 @@ lpm publish --check --min-score 90  # Check only, fail if below 90 (useful in CI
 | `--check` | Run quality checks and display report, then exit without publishing |
 | `--min-score <n>` | Set minimum quality score (0-100) required to publish |
 
+> **Note:** If `.lpm/skills/` exists in your package but skills aren't included in the tarball, the CLI warns you to add `.lpm` to the `files` field in package.json.
+
 #### Install
 
 Install packages from the registry with automatic authentication.
@@ -116,8 +118,15 @@ Install packages from the registry with automatic authentication.
 lpm install @lpm.dev/owner.package-name
 lpm install @lpm.dev/tolgaergin.utils @lpm.dev/acme.helpers
 lpm install                 # Install all @lpm.dev packages from package.json
+lpm install --no-skills     # Skip fetching Agent Skills
 lpm i                       # Shortcut
 ```
+
+Agent Skills are fetched by default for packages that include them.
+
+| Option | Description |
+|--------|-------------|
+| `--no-skills` | Skip fetching Agent Skills after install |
 
 #### Add (Source Code)
 
@@ -128,10 +137,13 @@ Download and extract package source code directly into your project (shadcn-styl
 lpm add @lpm.dev/owner.component
 lpm add @lpm.dev/tolgaergin.button --path ./src/ui/Button
 lpm add @lpm.dev/owner.component --force  # Overwrite without prompting
+lpm add @lpm.dev/owner.component --no-skills  # Skip fetching Agent Skills
 
 # Swift (auto-detects project type)
 lpm add @lpm.dev/acme.swift-charts
 ```
+
+Agent Skills are fetched by default for packages that include them.
 
 For Swift projects, the CLI auto-detects whether you have a `Package.swift` (SPM package) or `.xcodeproj` (Xcode app project):
 
@@ -172,12 +184,28 @@ lpm check-name acme.new-package --json
 
 #### Quality
 
-Show the server-side quality report for a published package. Displays the score, tier, and breakdown of all 27 checks.
+Show the server-side quality report for a published package. Displays the score, tier, and breakdown of all 28 checks.
 
 ```bash
 lpm quality @lpm.dev/owner.package
 lpm quality @lpm.dev/owner.package --json
 ```
+
+### Skills
+
+Manage Agent Skills for AI coding assistants.
+
+#### `lpm skills validate`
+Validate `.lpm/skills/*.md` files in the current directory. Checks file format, frontmatter, content, size limits, and blocked patterns. Shows quality score impact.
+
+#### `lpm skills install [package]`
+Fetch and install skills from the registry. Without a package argument, installs skills for all `@lpm.dev/*` dependencies in package.json. Saves to `.lpm/skills/{package-name}/` and adds `.lpm/skills/` to `.gitignore`.
+
+#### `lpm skills list`
+List available skills for all installed `@lpm.dev/*` packages. Shows which packages have skills, how many, and whether they're installed locally.
+
+#### `lpm skills clean`
+Remove the `.lpm/skills/` directory and all locally installed skills.
 
 ### Security & Maintenance
 
@@ -332,7 +360,7 @@ import {
 
 | Function | Description |
 |----------|-------------|
-| `runQualityChecks({ packageJson, readme, lpmConfig, files, unpackedSize })` | Run all 27 quality checks and return score, checks, and tier |
+| `runQualityChecks({ packageJson, readme, lpmConfig, files, unpackedSize })` | Run all 28 quality checks and return score, checks, and tier |
 
 ### Package Config
 

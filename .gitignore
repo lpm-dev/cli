@@ -1,1 +1,3 @@
 node_modules
+# LPM Agent Skills (fetched from registry)
+.lpm/skills/
