@@ -1,6 +1,6 @@
 {
 	"name": "@lpm-registry/cli",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"description": "CLI for Licensed Package Manager",
 	"author": "LPM <hello@lpm.dev> (https://lpm.dev)",
 	"repository": {
@@ -29,6 +29,7 @@
 	"files": [
 		"bin",
 		"lib",
+		"!lib/__tests__",
 		"index.js",
 		"index.d.ts",
 		"README.md",

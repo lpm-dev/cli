@@ -103,6 +103,14 @@ program
 		"--min-score <score>",
 		"Minimum quality score required to publish (0-100)",
 	)
+	.option(
+		"--provenance",
+		"Force OIDC token exchange for secret-free publishing (auto-detected in GitHub Actions with id-token: write)",
+	)
+	.option(
+		"--dry-run",
+		"Validate and preview the publish (files, size, OIDC status) without uploading",
+	)
 	.action(publish)
 
 program
