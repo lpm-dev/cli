@@ -12,13 +12,13 @@ npm install -g @lpm-registry/cli
 
 LPM provides convenient aliases for common commands:
 
-| Shortcut | Full Command | Description |
-|----------|--------------|-------------|
-| `lpm i` | `lpm install` | Install packages |
-| `lpm p` | `lpm publish` | Publish package |
-| `lpm l` | `lpm login` | Log in |
-| `lpm lo` | `lpm logout` | Log out |
-| `lpm set <key> <value>` | `lpm config set` | Set config |
+| Shortcut                | Full Command     | Description      |
+| ----------------------- | ---------------- | ---------------- |
+| `lpm i`                 | `lpm install`    | Install packages |
+| `lpm p`                 | `lpm publish`    | Publish package  |
+| `lpm l`                 | `lpm login`      | Log in           |
+| `lpm lo`                | `lpm logout`     | Log out          |
+| `lpm set <key> <value>` | `lpm config set` | Set config       |
 
 ## Package Name Format
 
@@ -29,6 +29,7 @@ LPM uses the `@lpm.dev` scope for all packages with dot notation:
 ```
 
 Examples:
+
 - `@lpm.dev/tolgaergin.my-utils` (personal package)
 - `@lpm.dev/acme-corp.design-system` (org package)
 
@@ -103,10 +104,10 @@ lpm publish --min-score 80     # Block publish if quality score < 80
 lpm publish --check --min-score 90  # Check only, fail if below 90 (useful in CI)
 ```
 
-| Option | Description |
-|--------|-------------|
-| `--check` | Run quality checks and display report, then exit without publishing |
-| `--min-score <n>` | Set minimum quality score (0-100) required to publish |
+| Option            | Description                                                         |
+| ----------------- | ------------------------------------------------------------------- |
+| `--check`         | Run quality checks and display report, then exit without publishing |
+| `--min-score <n>` | Set minimum quality score (0-100) required to publish               |
 
 > **Note:** If `.lpm/skills/` exists in your package but skills aren't included in the tarball, the CLI warns you to add `.lpm` to the `files` field in package.json.
 
@@ -124,13 +125,13 @@ lpm i                       # Shortcut
 
 Agent Skills are fetched by default for packages that include them.
 
-| Option | Description |
-|--------|-------------|
+| Option        | Description                              |
+| ------------- | ---------------------------------------- |
 | `--no-skills` | Skip fetching Agent Skills after install |
 
 #### Add (Source Code)
 
-Download and extract package source code directly into your project (shadcn-style).
+Download and extract package source code directly into your project.
 
 ```bash
 # JavaScript
@@ -196,15 +197,19 @@ lpm quality @lpm.dev/owner.package --json
 Manage Agent Skills for AI coding assistants.
 
 #### `lpm skills validate`
+
 Validate `.lpm/skills/*.md` files in the current directory. Checks file format, frontmatter, content, size limits, and blocked patterns. Shows quality score impact.
 
 #### `lpm skills install [package]`
+
 Fetch and install skills from the registry. Without a package argument, installs skills for all `@lpm.dev/*` dependencies in package.json. Saves to `.lpm/skills/{package-name}/` and adds `.lpm/skills/` to `.gitignore`.
 
 #### `lpm skills list`
+
 List available skills for all installed `@lpm.dev/*` packages. Shows which packages have skills, how many, and whether they're installed locally.
 
 #### `lpm skills clean`
+
 Remove the `.lpm/skills/` directory and all locally installed skills.
 
 ### Security & Maintenance
@@ -335,49 +340,49 @@ import {
   runQualityChecks,
   parseLpmPackageReference,
   detectFramework,
-} from "@lpm-registry/cli"
+} from "@lpm-registry/cli";
 ```
 
 ### Integrity
 
-| Function | Description |
-|----------|-------------|
-| `generateIntegrity(buffer, algorithm?)` | Generate an SRI integrity hash (default: `sha512`) |
-| `verifyIntegrity(buffer, expected)` | Verify a buffer against an SRI integrity string |
-| `verifyIntegrityMultiple(buffer, integrities)` | Verify against multiple integrity strings |
-| `parseIntegrity(integrity)` | Parse an SRI string into `{ algorithm, digest }` |
+| Function                                       | Description                                        |
+| ---------------------------------------------- | -------------------------------------------------- |
+| `generateIntegrity(buffer, algorithm?)`        | Generate an SRI integrity hash (default: `sha512`) |
+| `verifyIntegrity(buffer, expected)`            | Verify a buffer against an SRI integrity string    |
+| `verifyIntegrityMultiple(buffer, integrities)` | Verify against multiple integrity strings          |
+| `parseIntegrity(integrity)`                    | Parse an SRI string into `{ algorithm, digest }`   |
 
 ### Path Safety
 
-| Function | Description |
-|----------|-------------|
-| `validateComponentPath(root, path)` | Validate a component install path stays within project |
-| `validateTarballPaths(extractDir, paths)` | Check tarball entries for path traversal attacks |
-| `resolveSafePath(base, user)` | Safely resolve a user-provided path |
-| `sanitizeFilename(name)` | Strip dangerous characters from a filename |
+| Function                                  | Description                                            |
+| ----------------------------------------- | ------------------------------------------------------ |
+| `validateComponentPath(root, path)`       | Validate a component install path stays within project |
+| `validateTarballPaths(extractDir, paths)` | Check tarball entries for path traversal attacks       |
+| `resolveSafePath(base, user)`             | Safely resolve a user-provided path                    |
+| `sanitizeFilename(name)`                  | Strip dangerous characters from a filename             |
 
 ### Quality
 
-| Function | Description |
-|----------|-------------|
+| Function                                                                    | Description                                                  |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------ |
 | `runQualityChecks({ packageJson, readme, lpmConfig, files, unpackedSize })` | Run all 28 quality checks and return score, checks, and tier |
 
 ### Package Config
 
-| Function | Description |
-|----------|-------------|
-| `parseLpmPackageReference(ref)` | Parse `@lpm.dev/owner.pkg@version?key=val` into components |
-| `readLpmConfig(dir)` | Read and validate `lpm.config.json` from a directory |
-| `validateLpmConfig(config)` | Validate a parsed config object |
-| `filterFiles(files, config, params)` | Filter file rules based on config conditions |
+| Function                             | Description                                                |
+| ------------------------------------ | ---------------------------------------------------------- |
+| `parseLpmPackageReference(ref)`      | Parse `@lpm.dev/owner.pkg@version?key=val` into components |
+| `readLpmConfig(dir)`                 | Read and validate `lpm.config.json` from a directory       |
+| `validateLpmConfig(config)`          | Validate a parsed config object                            |
+| `filterFiles(files, config, params)` | Filter file rules based on config conditions               |
 
 ### Project Utils
 
-| Function | Description |
-|----------|-------------|
-| `detectFramework()` | Detect the project framework (nextjs, vite, remix, astro) |
-| `getDefaultPath(framework, name)` | Get the default component install path for a framework |
-| `getUserImportPrefix()` | Get the user's import alias prefix (e.g. `@/`, `~/`) |
+| Function                          | Description                                               |
+| --------------------------------- | --------------------------------------------------------- |
+| `detectFramework()`               | Detect the project framework (nextjs, vite, remix, astro) |
+| `getDefaultPath(framework, name)` | Get the default component install path for a framework    |
+| `getUserImportPrefix()`           | Get the user's import alias prefix (e.g. `@/`, `~/`)      |
 
 ## Security
 
