@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.2] - 2026-03-16
+
+### Added
+
+- `publish.sh` script for automated linting, testing, and publishing to npm
+- Local project scanning for test files during quality checks — authors no longer need to ship test files in the tarball to earn quality points
+- Registry-scoped token storage — dev and production tokens no longer overwrite each other
+
+### Changed
+
+- Token storage is now scoped per registry URL with automatic migration from legacy un-scoped keys
+- Quality check "Has test files" now scans the local project directory instead of only the tarball contents
+
 ## [0.2.1] - 2026-03-12
 
 ### Added
