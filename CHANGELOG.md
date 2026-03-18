@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.4] - 2026-03-18
+
+### Added
+
+- **2FA support for publish** — CLI prompts for TOTP code before uploading when user or org has 2FA enabled. OIDC (CI/CD) tokens are exempt.
+- **Lifecycle scripts quality check** — New `no-lifecycle-scripts` check (2pts) flags packages with `preinstall`, `install`, `postinstall`, `preuninstall`, `uninstall`, or `postuninstall` scripts
+
+### Changed
+
+- Quality scoring rebalanced: `small-deps` 4pts→3pts, `has-exports-map` 4pts→3pts to accommodate the new lifecycle scripts check (total remains 100)
+- API client now passes through OTP-related 401/403 responses to callers instead of throwing generic auth errors
+
 ## [0.2.2] - 2026-03-16
 
 ### Added
