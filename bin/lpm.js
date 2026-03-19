@@ -19,6 +19,7 @@ import { logout } from "../lib/commands/logout.js"
 import { marketplaceCompare } from "../lib/commands/marketplace-compare.js"
 import { marketplaceEarnings } from "../lib/commands/marketplace-earnings.js"
 import { mcpRemove, mcpSetup, mcpStatus } from "../lib/commands/mcp-setup.js"
+import { npmrc } from "../lib/commands/npmrc.js"
 import { openDashboard } from "../lib/commands/open.js"
 import { outdated } from "../lib/commands/outdated.js"
 import { poolStats } from "../lib/commands/pool-stats.js"
@@ -202,7 +203,17 @@ program
 	.command("setup")
 	.description("Configure .npmrc for LPM packages (@lpm.dev scope)")
 	.option("-r, --registry <url>", "Custom registry URL")
+	.option(
+		"--oidc",
+		"Exchange CI OIDC token for install access (no secrets needed)",
+	)
 	.action(setup)
+
+program
+	.command("npmrc")
+	.description("Generate a read-only .npmrc token for local development")
+	.option("-d, --days <number>", "Token expiry in days (default: 30)")
+	.action(npmrc)
 
 program
 	.command("config [action] [key] [value]")

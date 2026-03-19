@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.5] - 2026-03-19
+
+### Added
+
+- **`lpm npmrc` command** — Generates a 30-day read-only token and writes it to `.npmrc` for local development. Auto-adds `.npmrc` to `.gitignore`. Makes `npm install` work without env vars or manual token setup.
+- **`lpm setup --oidc` flag** — Exchanges CI OIDC token (GitHub Actions, GitLab CI) for a short-lived read-only install token. Eliminates static `LPM_TOKEN` secrets in CI. Falls back to `${LPM_TOKEN}` placeholder if OIDC is unavailable.
+- **OIDC read scope support** — Server-side OIDC token exchange now accepts `?scope=read` for install-only tokens (30 min TTL). Uses Supabase OAuth identity linking instead of trusted publisher config.
+
+### Changed
+
+- OIDC module refactored for reuse — `exchangeOidcInstallToken()` auto-detects CI environment and exchanges for read-only tokens
+- `lpm setup` default mode now mentions `lpm npmrc` and `--oidc` in help output
+
 ## [0.2.4] - 2026-03-18
 
 ### Added
