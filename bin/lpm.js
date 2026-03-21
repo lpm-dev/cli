@@ -36,6 +36,7 @@ import {
 	skillsValidate,
 } from "../lib/commands/skills.js"
 import { rotateToken } from "../lib/commands/token-rotate.js"
+import { uninstall } from "../lib/commands/uninstall.js"
 import { whoami } from "../lib/commands/whoami.js"
 
 // Load package.json
@@ -93,7 +94,15 @@ program
 	.description("Install packages with automatic registry authentication")
 	.option("--json", "Machine-readable JSON output")
 	.option("--no-skills", "Skip fetching Agent Skills after install")
+	.option("--pm <manager>", "Package manager to use (npm, pnpm, yarn, bun)")
 	.action(install)
+
+program
+	.command("uninstall <packages...>")
+	.aliases(["un", "unlink"])
+	.description("Uninstall packages via package manager")
+	.option("--pm <manager>", "Package manager to use (npm, pnpm, yarn, bun)")
+	.action(uninstall)
 
 program
 	.command("publish")

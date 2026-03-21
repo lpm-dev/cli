@@ -65,23 +65,28 @@ lpm whoami
 
 ### Project Setup
 
-#### Setup .npmrc
+#### Generate .npmrc Token (Local Dev)
 
-Configure your project's `.npmrc` for LPM packages. Required for CI/CD deployments.
+Generate a 30-day read-only token for your project. Makes `npm install` work with LPM packages.
 
 ```bash
-lpm setup
+lpm npmrc                  # 30-day token (default)
+lpm npmrc --days 7         # 7-day token
+lpm npmrc --days 90        # 90-day token
 ```
 
-This creates a `.npmrc` file with the LPM registry configuration:
+Automatically adds `.npmrc` to `.gitignore` to prevent token leaks.
 
-```ini
-# LPM Registry
-@lpm.dev:registry=https://lpm.dev/api/registry
-//lpm.dev/api/registry/:_authToken=${LPM_TOKEN}
+#### Setup .npmrc (CI/CD)
+
+Configure `.npmrc` for CI/CD environments.
+
+```bash
+lpm setup                  # Writes ${LPM_TOKEN} placeholder
+lpm setup --oidc           # OIDC — no secrets needed (GitHub Actions, GitLab CI)
 ```
 
-For deployment, set the `LPM_TOKEN` environment variable on your platform (Vercel, Netlify, etc.).
+For deployment platforms (Vercel, Netlify), set the `LPM_TOKEN` environment variable.
 
 ### Package Management
 
@@ -120,6 +125,7 @@ lpm install @lpm.dev/owner.package-name
 lpm install @lpm.dev/tolgaergin.utils @lpm.dev/acme.helpers
 lpm install                 # Install all @lpm.dev packages from package.json
 lpm install --no-skills     # Skip fetching Agent Skills
+lpm install --pm pnpm       # Use pnpm instead of npm
 lpm i                       # Shortcut
 ```
 
@@ -128,6 +134,19 @@ Agent Skills are fetched by default for packages that include them.
 | Option        | Description                              |
 | ------------- | ---------------------------------------- |
 | `--no-skills` | Skip fetching Agent Skills after install |
+| `--pm <name>` | Package manager: npm (default), pnpm, yarn, bun |
+
+Set a default package manager: `lpm config set packageManager pnpm`
+
+#### Uninstall
+
+Uninstall packages with automatic registry authentication.
+
+```bash
+lpm uninstall @lpm.dev/owner.package-name
+lpm uninstall --pm pnpm     # Use pnpm
+lpm un                      # Shortcut
+```
 
 #### Add (Source Code)
 

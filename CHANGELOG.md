@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.6] - 2026-03-21
+
+### Added
+
+- **`lpm uninstall` command** — Mirrors `npm uninstall` with automatic registry auth. Aliases: `lpm un`, `lpm unlink`.
+- **`--pm` flag for install/uninstall** — Choose package manager: `lpm install --pm pnpm`. Supports npm (default), pnpm, yarn, bun.
+- **`lpm config set packageManager`** — Set default package manager globally. Also available via `LPM_PACKAGE_MANAGER` env var.
+
+### Changed
+
+- `lpm install` now shows package list before install: "Found 15 LPM packages in package.json"
+- Skills install now scoped to explicit packages when specified (`lpm install @lpm.dev/pkg` only fetches skills for that package)
+- Skills install skips `file:`, `link:`, `workspace:` dependencies (local packages)
+- `lpm doctor` registry check fixed — uses `/-/whoami` endpoint instead of non-existent `/health`
+- Publish script updated with version bumping, git commit/tag/push, and `--dry-run` support
+
+### Fixed
+
+- pnpm/yarn/bun compatibility — no longer passes npm-specific `--userconfig` flag. Uses project `.npmrc` with backup/restore for non-npm package managers.
+
 ## [0.2.5] - 2026-03-19
 
 ### Added
