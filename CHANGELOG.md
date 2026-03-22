@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0] - 2026-03-22
+
+### Added
+
+- **Upstream npm proxy mode (default)** — `lpm npmrc` and `lpm setup` now configure LPM as the default registry. All packages (LPM + npm) are fetched through LPM for faster, edge-cached installs via Cloudflare R2.
+- **`--scoped` flag** — Use `lpm npmrc --scoped` or `lpm setup --scoped` to only route `@lpm.dev` packages through LPM (old behavior).
+- **Custom registry detection** — If `.npmrc` already has a custom default registry (e.g., Artifactory), the CLI warns and automatically falls back to `--scoped` mode to avoid overriding it.
+- **Pre-publish skills staleness warning** — When Agent Skills haven't changed since the previous version, the warning now appears before the publish confirmation prompt (instead of after), so you can cancel and update skills before publishing.
+
+### Changed
+
+- `lpm npmrc` default output changed from `@lpm.dev:registry=...` (scoped) to `registry=...` (proxy mode)
+- `lpm setup` and `lpm setup --oidc` default output changed to proxy mode
+- Updated CLI output messaging to indicate proxy vs scoped mode
+- Updated README with new default behavior and `--scoped` flag
+
 ## [0.2.6] - 2026-03-21
 
 ### Added
