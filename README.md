@@ -69,10 +69,13 @@ lpm whoami
 
 Generate a 30-day read-only token for your project. Makes `npm install` work with LPM packages.
 
+By default, LPM is configured as your default registry — all packages (LPM + npm) are fetched through LPM for faster, edge-cached installs.
+
 ```bash
-lpm npmrc                  # 30-day token (default)
+lpm npmrc                  # 30-day token, proxy mode (default)
 lpm npmrc --days 7         # 7-day token
 lpm npmrc --days 90        # 90-day token
+lpm npmrc --scoped         # Only route @lpm.dev packages through LPM
 ```
 
 Automatically adds `.npmrc` to `.gitignore` to prevent token leaks.
@@ -82,8 +85,9 @@ Automatically adds `.npmrc` to `.gitignore` to prevent token leaks.
 Configure `.npmrc` for CI/CD environments.
 
 ```bash
-lpm setup                  # Writes ${LPM_TOKEN} placeholder
+lpm setup                  # Writes ${LPM_TOKEN} placeholder (proxy mode)
 lpm setup --oidc           # OIDC — no secrets needed (GitHub Actions, GitLab CI)
+lpm setup --scoped         # Only route @lpm.dev packages through LPM
 ```
 
 For deployment platforms (Vercel, Netlify), set the `LPM_TOKEN` environment variable.

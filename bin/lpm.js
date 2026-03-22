@@ -210,11 +210,15 @@ program
 
 program
 	.command("setup")
-	.description("Configure .npmrc for LPM packages (@lpm.dev scope)")
+	.description("Configure .npmrc for LPM registry")
 	.option("-r, --registry <url>", "Custom registry URL")
 	.option(
 		"--oidc",
 		"Exchange CI OIDC token for install access (no secrets needed)",
+	)
+	.option(
+		"--scoped",
+		"Only route @lpm.dev packages through LPM (don't proxy npm)",
 	)
 	.action(setup)
 
@@ -222,6 +226,10 @@ program
 	.command("npmrc")
 	.description("Generate a read-only .npmrc token for local development")
 	.option("-d, --days <number>", "Token expiry in days (default: 30)")
+	.option(
+		"--scoped",
+		"Only route @lpm.dev packages through LPM (don't proxy npm)",
+	)
 	.action(npmrc)
 
 program
