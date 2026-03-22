@@ -16,28 +16,23 @@ info() { echo -e "${BOLD}$1${NC}"; }
 warn() { echo -e "${YELLOW}$1${NC}"; }
 fail() { echo -e "${RED}✗ $1${NC}"; exit 1; }
 
-DRY_RUN=false
-BUMP=""
-for arg in "$@"; do
-	case "$arg" in
-		--dry-run) DRY_RUN=true ;;
-		patch|minor|major) BUMP="$arg" ;;
-		--help|-h)
-			echo "Usage: ./publish.sh [patch|minor|major] [--dry-run]"
-			echo ""
-			echo "Lint, test, bump version, commit, push, and publish @lpm-registry/cli to npm."
-			echo ""
-			echo "  patch       Bump patch version (1.0.0 → 1.0.1)"
-			echo "  minor       Bump minor version (1.0.0 → 1.1.0)"
-			echo "  major       Bump major version (1.0.0 → 2.0.0)"
-			echo "  --dry-run   Run lint + test but skip bump, commit, push, and publish"
-			echo ""
-			echo "If no bump type is given, publishes the current version in package.json."
-			exit 0
-			;;
-		*) fail "Unknown argument: $arg" ;;
-	esac
-done
+BUMP="${1:-}"
+
+case "$BUMP" in
+	patch|minor|major) ;;
+	--help|-h)
+		echo "Usage: ./publish.sh <patch|minor|major>"
+		echo ""
+		echo "Lint, test, bump version, commit, tag, push — GitHub Actions publishes to npm."
+		echo ""
+		echo "  patch   1.0.0 → 1.0.1"
+		echo "  minor   1.0.0 → 1.1.0"
+		echo "  major   1.0.0 → 2.0.0"
+		exit 0
+		;;
+	"") fail "Usage: ./publish.sh <patch|minor|major>" ;;
+	*) fail "Unknown argument: $BUMP. Use patch, minor, or major." ;;
+esac
 
 # Check for clean git state
 if [ -n "$(git status --porcelain)" ]; then
@@ -45,25 +40,6 @@ if [ -n "$(git status --porcelain)" ]; then
 fi
 
 NAME=$(node -p "require('./package.json').name")
-VERSION=$(node -p "require('./package.json').version")
-
-# Bump version if requested
-if [ -n "$BUMP" ]; then
-	info "Bumping $BUMP version..."
-	npm version "$BUMP" --no-git-tag-version --silent
-	VERSION=$(node -p "require('./package.json').version")
-	ok "Version bumped to $VERSION"
-fi
-
-info "$NAME@$VERSION"
-echo ""
-
-# Check npm auth
-info "Checking npm auth..."
-if ! npm whoami &>/dev/null; then
-	fail "Not logged in to npm. Run 'npm login' first."
-fi
-ok "Logged in as $(npm whoami)"
 
 # Lint
 info "Linting..."
@@ -75,23 +51,20 @@ info "Testing..."
 npm test || fail "Tests failed"
 ok "Tests passed"
 
-if [ "$DRY_RUN" = true ]; then
-	warn "Dry run — skipping commit, push, and publish"
-	npm publish --access public --dry-run
-	exit 0
-fi
+# Bump version
+info "Bumping $BUMP version..."
+npm version "$BUMP" --no-git-tag-version --silent
+VERSION=$(node -p "require('./package.json').version")
+ok "Version bumped to $VERSION"
 
-# Commit + tag + push (only if we bumped)
-if [ -n "$BUMP" ]; then
-	info "Committing version bump..."
-	git add package.json
-	git commit -m "$VERSION"
-	git tag "v$VERSION"
-	git push origin main --tags
-	ok "Pushed v$VERSION to GitHub"
-fi
+# Commit + tag + push
+info "Committing and pushing..."
+git add package.json package-lock.json
+git commit -m "$VERSION"
+git tag "v$VERSION"
+git push origin main --tags
+ok "Pushed v$VERSION — GitHub Actions will publish to npm"
 
-# Publish
-info "Publishing $NAME@$VERSION..."
-npm publish --access public
-ok "Published $NAME@$VERSION"
+echo ""
+info "$NAME@$VERSION"
+echo -e "  Track: ${BOLD}https://github.com/lpm-dev/cli/actions${NC}"
