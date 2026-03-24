@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0] - 2026-03-24
+
+### Added
+
+- **Rust binary drop-in replacement** — `lpm` now automatically downloads and runs the native Rust binary on postinstall. 9x faster warm installs than pnpm, 24x faster than npm. Falls back to JS CLI if binary is unavailable.
+- **GitHub Releases distribution** — Platform-specific binaries (macOS arm64/x64, Linux arm64/x64, Windows x64) hosted on GitHub Releases, downloaded automatically during `npm install -g @lpm-registry/cli`.
+- **Auto-integrate Agent Skills with AI editors** — After `lpm skills install`, skills are automatically wired into detected AI editor configs (Claude Code `CLAUDE.md`, Cursor `.cursorrules`, etc.). Use `--no-editor-setup` to skip.
+- **`--no-editor-setup` flag** for `lpm install` and `lpm skills install` — Skip auto-configuring AI editor integration for skills.
+
+### Changed
+
+- Binary download URL updated from `lpm.dev/releases` to GitHub Releases (`github.com/lpm-dev/rust-client/releases`)
+- Skills install now passes `editorSetup` option through from `lpm install` to `lpm skills install`
+- Fixed unused variable lint warning in `bin/lpm.js`
+
 ## [0.3.0] - 2026-03-22
 
 ### Added

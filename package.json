@@ -1,6 +1,6 @@
 {
 	"name": "@lpm-registry/cli",
-	"version": "0.3.0",
+	"version": "0.4.0",
 	"description": "CLI for Licensed Package Manager",
 	"author": "LPM <hello@lpm.dev> (https://lpm.dev)",
 	"repository": {
@@ -29,6 +29,7 @@
 	"files": [
 		"bin",
 		"lib",
+		"scripts",
 		"!lib/__tests__",
 		"index.js",
 		"index.d.ts",
@@ -38,6 +39,7 @@
 	],
 	"scripts": {
 		"prepare": "husky",
+		"postinstall": "node scripts/install-binary.js",
 		"test": "vitest run",
 		"test:watch": "vitest",
 		"lint": "biome check .",

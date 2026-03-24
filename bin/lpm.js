@@ -1,8 +1,33 @@
 #!/usr/bin/env node
 
+import { execFileSync } from "node:child_process"
 import fs from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
+
+// ─── Try Rust binary first ──────────────────────────────────────────
+const __dirname_early = path.dirname(fileURLToPath(import.meta.url))
+const binaryName = process.platform === "win32" ? "lpm-bin.exe" : "lpm-bin"
+const binaryPath = path.join(__dirname_early, binaryName)
+
+if (fs.existsSync(binaryPath)) {
+	try {
+		// Delegate to Rust binary with all args
+		execFileSync(binaryPath, process.argv.slice(2), {
+			stdio: "inherit",
+			env: process.env,
+		})
+		process.exit(0)
+	} catch (err) {
+		// execFileSync throws on non-zero exit — propagate the exit code
+		if (err.status != null) {
+			process.exit(err.status)
+		}
+		// Binary failed to execute — fall through to JS CLI
+	}
+}
+
+// ─── JS CLI fallback ────────────────────────────────────────────────
 import { Command } from "commander"
 import updateNotifier from "update-notifier"
 import { add } from "../lib/commands/add.js"
@@ -94,6 +119,10 @@ program
 	.description("Install packages with automatic registry authentication")
 	.option("--json", "Machine-readable JSON output")
 	.option("--no-skills", "Skip fetching Agent Skills after install")
+	.option(
+		"--no-editor-setup",
+		"Skip auto-configuring AI editor integration for skills",
+	)
 	.option("--pm <manager>", "Package manager to use (npm, pnpm, yarn, bun)")
 	.action(install)
 
@@ -331,6 +360,10 @@ skills
 		"Fetch and install skills from the registry (all deps or specific package)",
 	)
 	.option("--json", "Output in JSON format")
+	.option(
+		"--no-editor-setup",
+		"Skip auto-configuring AI editor integration for skills",
+	)
 	.action(skillsInstall)
 
 skills

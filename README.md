@@ -1,11 +1,15 @@
 # LPM CLI
 
-The command-line interface for the Licensed Package Manager (LPM).
+The command-line interface for the Licensed Package Manager (LPM). Ships with a native Rust binary for fast installs — 9x faster than pnpm, 24x faster than npm.
 
 ## Installation
 
 ```bash
+# npm (recommended — auto-downloads native binary)
 npm install -g @lpm-registry/cli
+
+# curl (standalone, no Node required)
+curl -fsSL https://raw.githubusercontent.com/lpm-dev/rust-client/main/install.sh | sh
 ```
 
 ## Command Shortcuts
