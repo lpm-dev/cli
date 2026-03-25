@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0] - 2026-03-25
+
+### Changed
+
+- **Rust binary v0.5.0** — Updated binary with install/add separation (Swift via `lpm install`), script runner (`lpm dev`), npmrc command, update notifier, binary lockfile, and more.
+- Version bump to stay in sync with Rust binary releases.
+
 ## [0.4.0] - 2026-03-24
 
 ### Added
