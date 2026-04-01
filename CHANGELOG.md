@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.0] - 2026-04-01
+
+### Changed
+
+- **Rust binary v0.7.0** — Cold install 15.8s → 2.1s (7.5x faster). Abbreviated npm packuments, deep server-side transitive resolution, edge npm metadata proxy, connection pool sharing, hash-during-download.
+- **Unpublished package handling** — On tarball 404, metadata cache is invalidated and lockfile cleared so the next install re-resolves with fresh metadata.
+- Version bump to stay in sync with Rust binary releases.
+
 ## [0.6.0] - 2026-04-01
 
 ### Added
