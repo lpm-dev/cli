@@ -62,8 +62,8 @@ export interface QualityCheck {
 	label: string
 	passed: boolean
 	points: number
-	maxPoints: number
-	serverOnly?: boolean
+	max_points: number
+	server_only?: boolean
 }
 
 export interface QualityMeta {

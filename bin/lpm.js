@@ -1,33 +1,76 @@
 #!/usr/bin/env node
 
+/**
+ * LPM CLI Entry Point — Minimal fallback wrapper.
+ *
+ * In most cases, this file has been replaced by a hard link to the native
+ * Rust binary during postinstall (zero Node.js overhead). This JS wrapper
+ * only runs when:
+ *
+ * 1. Hard-link failed (cross-device mount, permissions)
+ * 2. npm rebuild recreated the symlink
+ * 3. Binary download failed during postinstall
+ *
+ * Resolution order:
+ * 1. Try platform package binary (optionalDependencies)
+ * 2. Try lpm-bin in bin/ directory (GitHub Releases download)
+ * 3. Fall through to JS CLI implementation
+ */
+
 import { execFileSync } from "node:child_process"
 import fs from "node:fs"
+import { createRequire } from "node:module"
+import os from "node:os"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
-// ─── Try Rust binary first ──────────────────────────────────────────
-const __dirname_early = path.dirname(fileURLToPath(import.meta.url))
-const binaryName = process.platform === "win32" ? "lpm-bin.exe" : "lpm-bin"
-const binaryPath = path.join(__dirname_early, binaryName)
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const require = createRequire(import.meta.url)
 
-if (fs.existsSync(binaryPath)) {
+// ─── Try native binary (Tier 1: platform package) ──────────────────
+
+const PLATFORMS = {
+	"darwin-arm64": { pkg: "@lpm-registry/cli-darwin-arm64", binary: "lpm" },
+	"darwin-x64": { pkg: "@lpm-registry/cli-darwin-x64", binary: "lpm" },
+	"linux-x64": { pkg: "@lpm-registry/cli-linux-x64", binary: "lpm" },
+	"linux-arm64": { pkg: "@lpm-registry/cli-linux-arm64", binary: "lpm" },
+	"win32-x64": { pkg: "@lpm-registry/cli-win32-x64", binary: "lpm.exe" },
+}
+
+// Allow override via environment variable (for debugging / custom builds)
+const envBinary = process.env.LPM_BINARY_PATH
+if (envBinary && fs.existsSync(envBinary)) {
+	runBinary(envBinary)
+}
+
+// Try platform package from optionalDependencies
+const platform = `${process.platform}-${os.arch()}`
+const platformInfo = PLATFORMS[platform]
+
+if (platformInfo) {
 	try {
-		// Delegate to Rust binary with all args
-		execFileSync(binaryPath, process.argv.slice(2), {
-			stdio: "inherit",
-			env: process.env,
-		})
-		process.exit(0)
-	} catch (err) {
-		// execFileSync throws on non-zero exit — propagate the exit code
-		if (err.status != null) {
-			process.exit(err.status)
+		const pkgJsonPath = require.resolve(`${platformInfo.pkg}/package.json`)
+		const binaryPath = path.join(path.dirname(pkgJsonPath), platformInfo.binary)
+		if (fs.existsSync(binaryPath)) {
+			runBinary(binaryPath)
 		}
-		// Binary failed to execute — fall through to JS CLI
+	} catch {
+		// Package not installed
 	}
 }
 
-// ─── JS CLI fallback ────────────────────────────────────────────────
+// ─── Try native binary (Tier 2: downloaded by postinstall) ─────────
+
+const legacyBinaryName =
+	process.platform === "win32" ? "lpm-bin.exe" : "lpm-bin"
+const legacyBinaryPath = path.join(__dirname, legacyBinaryName)
+
+if (fs.existsSync(legacyBinaryPath)) {
+	runBinary(legacyBinaryPath)
+}
+
+// ─── JS CLI fallback (Tier 3) ──────────────────────────────────────
+
 import { Command } from "commander"
 import updateNotifier from "update-notifier"
 import { add } from "../lib/commands/add.js"
@@ -65,7 +108,6 @@ import { uninstall } from "../lib/commands/uninstall.js"
 import { whoami } from "../lib/commands/whoami.js"
 
 // Load package.json
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const pkg = JSON.parse(
 	fs.readFileSync(path.join(__dirname, "../package.json"), "utf-8"),
 )
@@ -80,16 +122,12 @@ program
 	.description("CLI for Licensed Package Manager")
 	.version(pkg.version)
 
-// ============================================================================
-// Authentication Commands
-// ============================================================================
-
+// Authentication
 program
 	.command("login")
 	.alias("l")
 	.description("Authenticate with the registry")
 	.action(login)
-
 program
 	.command("logout")
 	.alias("lo")
@@ -97,307 +135,213 @@ program
 	.option("--revoke", "Also revoke the token on the server")
 	.option("--clear-cache", "Clear local package cache")
 	.action(logout)
-
 program
 	.command("whoami")
 	.description("Check current authenticated user")
 	.option("--json", "Output in JSON format")
 	.action(whoami)
 
-// ============================================================================
-// Package Management Commands
-// ============================================================================
-
+// Package Management
 program
 	.command("init")
 	.description("Interactively create a package.json for LPM")
 	.action(init)
-
 program
 	.command("install [packages...]")
 	.alias("i")
-	.description("Install packages with automatic registry authentication")
+	.description("Install packages")
 	.option("--json", "Machine-readable JSON output")
-	.option("--no-skills", "Skip fetching Agent Skills after install")
-	.option(
-		"--no-editor-setup",
-		"Skip auto-configuring AI editor integration for skills",
-	)
-	.option("--pm <manager>", "Package manager to use (npm, pnpm, yarn, bun)")
+	.option("--no-skills", "Skip fetching Agent Skills")
+	.option("--pm <manager>", "Package manager to use")
 	.action(install)
-
 program
 	.command("uninstall <packages...>")
 	.aliases(["un", "unlink"])
-	.description("Uninstall packages via package manager")
-	.option("--pm <manager>", "Package manager to use (npm, pnpm, yarn, bun)")
+	.description("Uninstall packages")
+	.option("--pm <manager>", "Package manager to use")
 	.action(uninstall)
-
 program
 	.command("publish")
 	.alias("p")
 	.description("Publish a package to the registry")
-	.option("--check", "Run quality checks and display report without publishing")
-	.option(
-		"--min-score <score>",
-		"Minimum quality score required to publish (0-100)",
-	)
-	.option(
-		"--provenance",
-		"Force OIDC token exchange for secret-free publishing (auto-detected in GitHub Actions with id-token: write)",
-	)
-	.option(
-		"--dry-run",
-		"Validate and preview the publish (files, size, OIDC status) without uploading",
-	)
+	.option("--check", "Quality check only")
+	.option("--min-score <score>", "Minimum quality score")
+	.option("--provenance", "Force OIDC provenance")
+	.option("--dry-run", "Preview without publishing")
 	.action(publish)
-
 program
 	.command("add <package>")
-	.description("Download and extract a package source code to your project")
-	.option("-p, --path <path>", "Target directory for the component")
-	.option("-f, --force", "Overwrite existing files without prompting")
-	.option("-y, --yes", "Accept defaults, skip interactive config prompts")
-	.option("--alias <alias>", "Import alias prefix (e.g., @/components/ui)")
-	.option("--target <name>", "Swift SPM target name")
-	.option("--install-deps", "Auto-install npm dependencies (default: true)")
-	.option("--no-install-deps", "Skip npm dependency installation")
-	.option("--json", "Machine-readable JSON output")
-	.option("--dry-run", "Preview what would happen without writing files")
-	.option("--no-skills", "Skip fetching Agent Skills after add")
+	.description("Extract package source code")
+	.option("-p, --path <path>", "Target directory")
+	.option("-f, --force", "Overwrite existing files")
+	.option("-y, --yes", "Accept defaults")
+	.option("--alias <alias>", "Import alias prefix")
+	.option("--target <name>", "Swift SPM target")
+	.option("--json", "JSON output")
+	.option("--dry-run", "Preview only")
 	.action(add)
-
 program
 	.command("remove <package>")
 	.alias("rm")
-	.description(
-		"Remove a previously added package (e.g., MCP servers from editors)",
-	)
+	.description("Remove a previously added package")
 	.action(remove)
 
-// ============================================================================
-// Package Discovery Commands
-// ============================================================================
-
+// Discovery
 program
 	.command("search <query>")
-	.description("Search for packages in the marketplace")
-	.option("--limit <n>", "Maximum number of results", "20")
-	.option("--json", "Output in JSON format")
-	.action((query, options) =>
-		search(query, { ...options, limit: parseInt(options.limit, 10) }),
-	)
-
+	.description("Search packages")
+	.option("--limit <n>", "Max results", "20")
+	.option("--json", "JSON output")
+	.action((q, o) => search(q, { ...o, limit: parseInt(o.limit, 10) }))
 program
 	.command("info <package>")
-	.description("Show detailed information about a package")
-	.option("--json", "Output in JSON format")
+	.description("Package info")
+	.option("--json", "JSON output")
 	.option("-a, --all-versions", "Show all versions")
 	.action(info)
-
 program
 	.command("check-name <name>")
-	.description("Check if a package name is available on the registry")
-	.option("--json", "Output in JSON format")
+	.description("Check name availability")
+	.option("--json", "JSON output")
 	.action(checkName)
-
 program
 	.command("quality <package>")
-	.description("Show the server-side quality report for a package")
-	.option("--json", "Output in JSON format")
+	.description("Quality report")
+	.option("--json", "JSON output")
 	.action(quality)
 
-// ============================================================================
-// Security & Maintenance Commands
-// ============================================================================
-
+// Maintenance
 program
 	.command("audit [action]")
-	.description("Scan dependencies for known vulnerabilities")
-	.option("--json", "Output in JSON format")
-	.option(
-		"--level <level>",
-		"Minimum severity to report (low, moderate, high, critical)",
-	)
+	.description("Security audit")
+	.option("--json", "JSON output")
+	.option("--level <level>", "Minimum severity")
 	.action(audit)
-
 program
 	.command("outdated")
-	.description("Check for outdated dependencies")
-	.option("--json", "Output in JSON format")
-	.option("--all", "Show all dependencies, not just outdated ones")
+	.description("Check outdated deps")
+	.option("--json", "JSON output")
+	.option("--all", "Show all deps")
 	.action(outdated)
+program.command("doctor").description("Health check").action(doctor)
 
-program
-	.command("doctor")
-	.description("Check the health of your LPM setup")
-	.action(doctor)
-
-// ============================================================================
-// Configuration Commands
-// ============================================================================
-
+// Configuration
 program
 	.command("setup")
-	.description("Configure .npmrc for LPM registry")
+	.description("Configure .npmrc")
 	.option("-r, --registry <url>", "Custom registry URL")
-	.option(
-		"--oidc",
-		"Exchange CI OIDC token for install access (no secrets needed)",
-	)
-	.option(
-		"--scoped",
-		"Only route @lpm.dev packages through LPM (don't proxy npm)",
-	)
+	.option("--oidc", "Exchange OIDC token")
+	.option("--scoped", "Scoped registry only")
 	.action(setup)
-
 program
 	.command("npmrc")
-	.description("Generate a read-only .npmrc token for local development")
-	.option("-d, --days <number>", "Token expiry in days (default: 30)")
-	.option(
-		"--scoped",
-		"Only route @lpm.dev packages through LPM (don't proxy npm)",
-	)
+	.description("Generate read-only .npmrc token")
+	.option("-d, --days <number>", "Token expiry days")
+	.option("--scoped", "Scoped registry only")
 	.action(npmrc)
-
 program
 	.command("config [action] [key] [value]")
-	.description("Manage CLI configuration (list, get, set, delete)")
+	.description("Manage CLI config")
 	.action(config)
-
 program
 	.command("set <key> <value>")
 	.description('Shortcut for "lpm config set"')
-	.action((key, value) => config("set", key, value))
-
+	.action((k, v) => config("set", k, v))
 program
 	.command("cache <action>")
-	.description("Manage local package cache (clean, list, path)")
+	.description("Manage local cache")
 	.action(cache)
 
-// ============================================================================
-// Utility Commands
-// ============================================================================
-
+// Utility
 program
 	.command("open")
-	.description("Open the dashboard or package page in your browser")
+	.description("Open dashboard in browser")
 	.action(openDashboard)
-
 program
 	.command("run <script>")
-	.description("Run npm scripts (forwards to npm run)")
+	.description("Run npm scripts")
 	.allowUnknownOption()
 	.action(run)
 
-// ============================================================================
-// Token Management (Subcommand)
-// ============================================================================
+// Subcommands
+const token = program.command("token").description("Token management")
+token.command("rotate").description("Rotate token").action(rotateToken)
 
-const token = program
-	.command("token")
-	.description("Manage authentication tokens")
-
-token
-	.command("rotate")
-	.description("Rotate the current token")
-	.action(rotateToken)
-
-// ============================================================================
-// Pool Revenue (Subcommand)
-// ============================================================================
-
-const pool = program.command("pool").description("Pool revenue commands")
-
+const pool = program.command("pool").description("Pool revenue")
 pool
 	.command("stats")
-	.description("Show your Pool earnings estimate for the current month")
-	.option("--json", "Output in JSON format")
+	.description("Pool earnings")
+	.option("--json", "JSON output")
 	.action(poolStats)
 
-// ============================================================================
-// MCP Server (Subcommand)
-// ============================================================================
-
-const mcp = program.command("mcp").description("MCP server commands")
-
+const mcp = program.command("mcp").description("MCP server")
 mcp
 	.command("setup")
-	.description("Configure the LPM MCP server in your AI coding editors")
-	.option("--project", "Add to project-level config instead of global")
+	.description("Configure MCP server")
+	.option("--project", "Project-level config")
 	.action(mcpSetup)
-
 mcp
 	.command("remove")
-	.description("Remove the LPM MCP server from all configured editors")
-	.option("--project", "Remove from project-level config only")
+	.description("Remove MCP server")
+	.option("--project", "Project-level only")
 	.action(mcpRemove)
-
 mcp
 	.command("status")
-	.description("Show where the LPM MCP server is configured")
-	.option("--verbose", "Show command and args diagnostics for each editor")
+	.description("MCP server status")
+	.option("--verbose", "Show diagnostics")
 	.action(mcpStatus)
 
-// ============================================================================
-// Agent Skills (Subcommand)
-// ============================================================================
-
-const skills = program
-	.command("skills")
-	.description("Manage Agent Skills for AI coding assistants")
-
+const skills = program.command("skills").description("Agent Skills")
 skills
 	.command("validate")
-	.description("Validate .lpm/skills/ files in the current directory")
-	.option("--json", "Output in JSON format")
+	.description("Validate skills files")
+	.option("--json", "JSON output")
 	.action(skillsValidate)
-
 skills
 	.command("install [package]")
-	.description(
-		"Fetch and install skills from the registry (all deps or specific package)",
-	)
-	.option("--json", "Output in JSON format")
-	.option(
-		"--no-editor-setup",
-		"Skip auto-configuring AI editor integration for skills",
-	)
+	.description("Install skills")
+	.option("--json", "JSON output")
 	.action(skillsInstall)
-
 skills
 	.command("list")
-	.description("List available skills for installed @lpm.dev/* packages")
-	.option("--json", "Output in JSON format")
+	.description("List available skills")
+	.option("--json", "JSON output")
 	.action(skillsList)
-
 skills
 	.command("clean")
-	.description("Remove locally installed skills (.lpm/skills/ directory)")
-	.option("--json", "Output in JSON format")
+	.description("Remove installed skills")
+	.option("--json", "JSON output")
 	.action(skillsClean)
 
-// ============================================================================
-// Marketplace (Subcommand)
-// ============================================================================
-
-const marketplace = program
-	.command("marketplace")
-	.description("Marketplace commands")
-
+const marketplace = program.command("marketplace").description("Marketplace")
 marketplace
 	.command("compare <input>")
-	.description("Find comparable packages by name or category")
-	.option("--json", "Output in JSON format")
+	.description("Find comparable packages")
+	.option("--json", "JSON output")
 	.option("--category <category>", "Filter by category")
-	.option("--limit <n>", "Maximum number of results")
+	.option("--limit <n>", "Max results")
 	.action(marketplaceCompare)
-
 marketplace
 	.command("earnings")
-	.description("Show your Marketplace revenue summary")
-	.option("--json", "Output in JSON format")
+	.description("Revenue summary")
+	.option("--json", "JSON output")
 	.action(marketplaceEarnings)
 
 program.parse()
+
+// ─── Helper ────────────────────────────────────────────────────────
+
+function runBinary(binaryPath) {
+	try {
+		execFileSync(binaryPath, process.argv.slice(2), {
+			stdio: "inherit",
+			env: process.env,
+		})
+		process.exit(0)
+	} catch (err) {
+		if (err.status != null) {
+			process.exit(err.status)
+		}
+		// Binary failed to execute — fall through to JS CLI
+	}
+}

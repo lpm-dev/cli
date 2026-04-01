@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.0] - 2026-04-01
+
+### Added
+
+- **Platform optionalDependencies (esbuild pattern)** — Native Rust binary now delivered via platform-specific npm packages (`@lpm-registry/cli-darwin-arm64`, etc.) instead of postinstall download. npm automatically installs only the matching platform package.
+- **Hard-link optimization** — Postinstall hard-links the native binary over `bin/lpm.js`, so `lpm` on PATH executes the Rust binary directly with zero Node.js overhead.
+- **3-tier binary resolution** — Entry point tries: (1) platform package binary, (2) GitHub Releases download fallback, (3) JS CLI fallback. Covers `--no-optional`, cross-device mounts, and offline scenarios.
+- **`LPM_BINARY_PATH` env override** — Point to a custom binary for debugging or local development.
+
+### Changed
+
+- **Rust binary v0.6.0** — Sigstore provenance signing, behavioral + supply-chain security tags, `lpm self-update`, `lpm tunnel`, `lpm vault`, `lpm migrate`, `lpm graph`, TUI dashboard, Xcode project editing, import rewriting enhancements, and more.
+- Quality check field renamed `maxPoints` → `max_points` for consistency with registry API responses.
+- `bin/lpm.js` rewritten from simple lpm-bin delegate to full 3-tier resolver with platform package support.
+- `scripts/install-binary.js` rewritten with esbuild-pattern hard-link optimization.
+
 ## [0.5.0] - 2026-03-25
 
 ### Changed
