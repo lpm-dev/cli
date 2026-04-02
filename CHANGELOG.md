@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.8.0] - 2026-04-01
+
+### Changed
+
+- **Rust binary v0.8.0** — Install hash fast-exit (82ms → 26ms up-to-date), NDJSON streaming batch metadata, resolver carries tarball URLs (eliminates double metadata fetch), up-to-date benchmark added.
+- **Scoped registry default** — `lpm setup` and `lpm npmrc` now write scoped config (`@lpm.dev:registry=`) by default. npm packages go direct to npmjs.org (faster, $0 proxy cost). Use `--proxy` to opt into full proxy mode (Pro/Org feature).
+- **Global config defaults** — `lpm config set allowNew true`, `lpm config set autoBuild true`, etc. CLI flags merge with `~/.lpm/config.toml` defaults.
+- **Migrate fix** — Corrected stale registry URL in `lpm migrate` (.npmrc now writes `/api/registry/` instead of `/api/packages/`).
+- Version bump to stay in sync with Rust binary releases.
+
 ## [0.7.0] - 2026-04-01
 
 ### Changed
