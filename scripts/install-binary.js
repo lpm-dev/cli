@@ -30,7 +30,6 @@
 import { execSync } from "node:child_process"
 import crypto from "node:crypto"
 import fs from "node:fs"
-import http from "node:http"
 import https from "node:https"
 import { createRequire } from "node:module"
 import os from "node:os"
@@ -310,6 +309,11 @@ function tryCopyBinary(binaryPath) {
 /**
  * Download a file from a URL, following redirects (GitHub → S3).
  *
+ * HTTPS-only end-to-end: the entry check rejects any non-`https://`
+ * URL, and redirect Locations are resolved against the current URL
+ * before re-entering the function — so an attacker-controlled mirror
+ * cannot downgrade transport mid-chain via `Location: http://…`.
+ *
  * Streams to disk with a per-response byte cap so a compromised mirror
  * cannot exhaust disk by serving an unbounded body. The 5-redirect cap
  * is preserved from the pre-integrity-gate shape.
@@ -318,18 +322,32 @@ function tryCopyBinary(binaryPath) {
  */
 export function download(url, dest, redirects = 0, maxBytes = ASSET_MAX_BYTES) {
 	if (redirects > 5) return Promise.reject(new Error("Too many redirects"))
-
-	const client = url.startsWith("https") ? https : http
+	if (!url.startsWith("https://")) {
+		return Promise.reject(
+			new Error(
+				`refusing non-HTTPS transport: ${url} (Tier-2 download requires HTTPS end-to-end)`,
+			),
+		)
+	}
 
 	return new Promise((resolve, reject) => {
-		const req = client.get(url, res => {
+		const req = https.get(url, res => {
 			if (
 				res.statusCode >= 300 &&
 				res.statusCode < 400 &&
 				res.headers.location
 			) {
 				res.resume()
-				resolve(download(res.headers.location, dest, redirects + 1, maxBytes))
+				let nextUrl
+				try {
+					nextUrl = new URL(res.headers.location, url).href
+				} catch {
+					reject(
+						new Error(`invalid redirect Location: ${res.headers.location}`),
+					)
+					return
+				}
+				resolve(download(nextUrl, dest, redirects + 1, maxBytes))
 				return
 			}
 
@@ -384,22 +402,38 @@ export function download(url, dest, redirects = 0, maxBytes = ASSET_MAX_BYTES) {
  * both of which are small and must be inspected as a whole before any
  * other byte is honored.
  *
+ * HTTPS-only: identical transport-hardening posture as [`download`].
+ *
  * Exported for testability.
  */
 export function downloadToBuffer(url, maxBytes, redirects = 0) {
 	if (redirects > 5) return Promise.reject(new Error("Too many redirects"))
-
-	const client = url.startsWith("https") ? https : http
+	if (!url.startsWith("https://")) {
+		return Promise.reject(
+			new Error(
+				`refusing non-HTTPS transport: ${url} (Tier-2 download requires HTTPS end-to-end)`,
+			),
+		)
+	}
 
 	return new Promise((resolve, reject) => {
-		const req = client.get(url, res => {
+		const req = https.get(url, res => {
 			if (
 				res.statusCode >= 300 &&
 				res.statusCode < 400 &&
 				res.headers.location
 			) {
 				res.resume()
-				resolve(downloadToBuffer(res.headers.location, maxBytes, redirects + 1))
+				let nextUrl
+				try {
+					nextUrl = new URL(res.headers.location, url).href
+				} catch {
+					reject(
+						new Error(`invalid redirect Location: ${res.headers.location}`),
+					)
+					return
+				}
+				resolve(downloadToBuffer(nextUrl, maxBytes, redirects + 1))
 				return
 			}
 

@@ -25,7 +25,12 @@ import os from "node:os"
 import path from "node:path"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import { parseManifestEntry, tryGitHubDownload } from "../install-binary.js"
+import {
+	download,
+	downloadToBuffer,
+	parseManifestEntry,
+	tryGitHubDownload,
+} from "../install-binary.js"
 
 function sha256(bytes) {
 	return crypto.createHash("sha256").update(bytes).digest("hex")
@@ -284,5 +289,58 @@ describe("tryGitHubDownload", () => {
 			String(args[0] ?? "").includes("Verified Sigstore signature"),
 		)
 		expect(sigstoreLine).toBe(false)
+	})
+})
+
+/**
+ * HTTPS-only transport hardening. The integrity gate's SHA / Sigstore
+ * verification only protects what's on the wire — a redirect that
+ * downgrades transport to plaintext would let an on-path attacker
+ * intercept the bytes that later get hashed and force the unsigned-
+ * fallback warning path.
+ *
+ * Mitigation has two layers:
+ *
+ *   1. Entry check on both helpers refuses any non-`https://` URL.
+ *   2. The redirect handler re-enters the same function with the
+ *      resolved Location, so a `Location: http://…` triggers the
+ *      same entry check on the recursive call. No real HTTPS server
+ *      is needed to prove this — the property is structural.
+ *
+ * A regression guard asserts that `node:http` is no longer imported,
+ * so the dual-client selector that triggered the audit finding can't
+ * silently come back via a future refactor.
+ */
+describe("Tier-2 transport hardening (HTTPS-only)", () => {
+	it("download() rejects non-HTTPS initial URLs", async () => {
+		await expect(download("http://example.com/x", "/tmp/x")).rejects.toThrow(
+			/refusing non-HTTPS transport/,
+		)
+	})
+
+	it("downloadToBuffer() rejects non-HTTPS initial URLs", async () => {
+		await expect(
+			downloadToBuffer("http://example.com/x", 1024),
+		).rejects.toThrow(/refusing non-HTTPS transport/)
+	})
+
+	it("rejects ftp://, file://, javascript:, and other non-https schemes", async () => {
+		for (const scheme of ["ftp", "file", "javascript", "data"]) {
+			await expect(
+				downloadToBuffer(`${scheme}://payload`, 1024),
+			).rejects.toThrow(/refusing non-HTTPS transport/)
+		}
+	})
+
+	it("does not import node:http (regression guard for the dual-client selector)", () => {
+		const src = fs.readFileSync(
+			path.join(
+				path.dirname(new URL(import.meta.url).pathname),
+				"..",
+				"install-binary.js",
+			),
+			"utf-8",
+		)
+		expect(src).not.toMatch(/from\s+["']node:http["']/)
 	})
 })
