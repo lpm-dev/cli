@@ -3,7 +3,10 @@ import { defineConfig } from "vitest/config"
 export default defineConfig({
 	test: {
 		globals: true,
-		include: ["lib/__tests__/**/*.test.{js,jsx}"],
+		include: [
+			"lib/__tests__/**/*.test.{js,jsx}",
+			"scripts/__tests__/**/*.test.{js,jsx}",
+		],
 		coverage: {
 			provider: "v8",
 			include: ["lib/**/*.js"],
