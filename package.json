@@ -1,83 +1,85 @@
 {
-  "name": "@lpm-registry/cli",
-  "version": "0.9.0",
-  "description": "CLI for Licensed Package Manager",
-  "author": "LPM <hello@lpm.dev> (https://lpm.dev)",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/lpm-dev/cli"
-  },
-  "homepage": "https://cli.lpm.dev",
-  "license": "ISC",
-  "keywords": [
-    "lpm",
-    "package-manager",
-    "registry",
-    "cli",
-    "npm",
-    "private-packages"
-  ],
-  "main": "index.js",
-  "bin": {
-    "lpm": "./bin/lpm.js"
-  },
-  "exports": {
-    ".": "./index.js",
-    "./lib/*": "./lib/*"
-  },
-  "types": "./index.d.ts",
-  "sideEffects": false,
-  "files": [
-    "bin",
-    "lib",
-    "scripts",
-    "!lib/__tests__",
-    "index.js",
-    "index.d.ts",
-    "README.md",
-    "CHANGELOG.md",
-    "LICENSE"
-  ],
-  "scripts": {
-    "prepare": "husky",
-    "postinstall": "node scripts/install-binary.js",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "lint": "biome check .",
-    "lint:fix": "biome check --write ."
-  },
-  "dependencies": {
-    "@clack/prompts": "^0.11.0",
-    "boxen": "^8.0.1",
-    "chalk": "^5.6.2",
-    "commander": "^11.1.0",
-    "conf": "^12.0.0",
-    "diff": "^8.0.2",
-    "inquirer": "^9.2.12",
-    "open": "^11.0.0",
-    "ora": "^8.2.0",
-    "semver": "^7.7.3",
-    "tar": "^7.5.2",
-    "update-notifier": "^7.3.1",
-    "xcode": "^3.0.1"
-  },
-  "optionalDependencies": {
-    "@lpm-registry/cli-darwin-arm64": "0.9.0",
-    "@lpm-registry/cli-darwin-x64": "0.9.0",
-    "@lpm-registry/cli-linux-x64": "0.9.0",
-    "@lpm-registry/cli-linux-arm64": "0.9.0",
-    "@lpm-registry/cli-win32-x64": "0.9.0",
-    "keytar": "^7.9.0",
-    "sigstore": "^3.0.0"
-  },
-  "type": "module",
-  "engines": {
-    "node": ">=18.0.0"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "^2.3.10",
-    "@types/node": "^22.0.0",
-    "husky": "^9.1.7",
-    "vitest": "^4.0.18"
-  }
+	"name": "@lpm-registry/cli",
+	"version": "0.9.0",
+	"private": true,
+	"description": "CLI for Licensed Package Manager",
+	"author": "LPM <hello@lpm.dev> (https://lpm.dev)",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/lpm-dev/cli"
+	},
+	"homepage": "https://cli.lpm.dev",
+	"license": "ISC",
+	"keywords": [
+		"lpm",
+		"package-manager",
+		"registry",
+		"cli",
+		"npm",
+		"private-packages"
+	],
+	"main": "index.js",
+	"bin": {
+		"lpm": "./bin/lpm.js"
+	},
+	"exports": {
+		".": "./index.js",
+		"./lib/*": "./lib/*"
+	},
+	"types": "./index.d.ts",
+	"sideEffects": false,
+	"files": [
+		"bin",
+		"lib",
+		"scripts",
+		"!lib/__tests__",
+		"index.js",
+		"index.d.ts",
+		"README.md",
+		"CHANGELOG.md",
+		"LICENSE"
+	],
+	"scripts": {
+		"prepare": "husky",
+		"prepublishOnly": "node -e \"console.error('This legacy JavaScript CLI repository no longer publishes @lpm-registry/cli. Publish from lpm-dev/rust-client/npm/cli instead.'); process.exit(1)\"",
+		"postinstall": "node scripts/install-binary.js",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"lint": "biome check .",
+		"lint:fix": "biome check --write ."
+	},
+	"dependencies": {
+		"@clack/prompts": "^0.11.0",
+		"boxen": "^8.0.1",
+		"chalk": "^5.6.2",
+		"commander": "^11.1.0",
+		"conf": "^12.0.0",
+		"diff": "^8.0.2",
+		"inquirer": "^9.2.12",
+		"open": "^11.0.0",
+		"ora": "^8.2.0",
+		"semver": "^7.7.3",
+		"tar": "^7.5.2",
+		"update-notifier": "^7.3.1",
+		"xcode": "^3.0.1"
+	},
+	"optionalDependencies": {
+		"@lpm-registry/cli-darwin-arm64": "0.9.0",
+		"@lpm-registry/cli-darwin-x64": "0.9.0",
+		"@lpm-registry/cli-linux-x64": "0.9.0",
+		"@lpm-registry/cli-linux-arm64": "0.9.0",
+		"@lpm-registry/cli-win32-x64": "0.9.0",
+		"keytar": "^7.9.0",
+		"sigstore": "^3.0.0"
+	},
+	"type": "module",
+	"engines": {
+		"node": ">=18.0.0"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.3.10",
+		"@types/node": "^22.0.0",
+		"husky": "^9.1.7",
+		"vitest": "^4.0.18"
+	}
 }
